@@ -55,6 +55,7 @@ class Base_Task(gym.Env):
         - `self.render_fre`: Render frequency.
         """
         super().__init__()
+        self.active_view = None
         ta.setup_logging("CRITICAL")  # hide logging
         np.random.seed(kwags.get("seed", 0))
         torch.manual_seed(kwags.get("seed", 0))
@@ -159,6 +160,28 @@ class Base_Task(gym.Env):
 
         self.stage_success_tag = False
 
+        if kwags.get("active_view", {}).get("enabled", False):
+            from active_view.runtime import ActiveView
+            self.active_view = ActiveView(self, kwags["active_view"])
+
+    def _step_physics(self):
+        av = getattr(self, "active_view", None)
+        if av is not None:
+            av.before_step()
+        self.scene.step()
+        if av is not None:
+            av.after_step()
+
+    def av_focus(self, phase, names, primary=None, ee=(), wait=True):
+        if self.active_view is not None:
+            self.active_view.focus(phase, names, primary=primary, ee=ee, wait=wait)
+
+    def take_action_av(self, action, steps=None, arm_velocity=None):
+        """Execute joint, gripper and pan/tilt targets for a fixed duration."""
+        if self.active_view is None:
+            raise RuntimeError("active_view must be enabled")
+        return self.active_view.policy_step(action, steps=steps, arm_velocity=arm_velocity)
+
     def check_stable(self):
         actors_list, actors_pose_list = [], []
         for actor in self.scene.get_all_actors():
@@ -172,7 +195,7 @@ class Base_Task(gym.Env):
         def check(times):
             nonlocal self, is_stable, actors_list, actors_pose_list
             for _ in range(times):
-                self.scene.step()
+                self._step_physics()
                 for idx, actor in enumerate(actors_list):
                     actors_pose_list[idx].append(actor.get_pose())
 
@@ -186,7 +209,7 @@ class Base_Task(gym.Env):
 
         is_stable = True
         for _ in range(2000):
-            self.scene.step()
+            self._step_physics()
         for idx, actor in enumerate(actors_list):
             actors_pose_list.append([actor.get_pose()])
         check(500)
@@ -412,7 +435,7 @@ class Base_Task(gym.Env):
             **kwags,
         )
         self.cameras.load_camera(self.scene)
-        self.scene.step()  # run a physical step
+        self._step_physics()  # run a physical step
         self.scene.update_render()  # sync pose from SAPIEN to renderer
 
     # =========================================================== Sapien ===========================================================
@@ -431,6 +454,8 @@ class Base_Task(gym.Env):
             now_ambient_light = np.clip(np.array(now_ambient_light) + np.random.rand(3) * 0.2 - 0.1, 0, 1)
             self.scene.set_ambient_light(now_ambient_light)
         self.cameras.update_wrist_camera(self.robot.left_camera.get_pose(), self.robot.right_camera.get_pose())
+        if self.active_view is not None:
+            self.active_view.apply_pose()
         self.scene.update_render()
 
     # =========================================================== Basic APIs ===========================================================
@@ -941,7 +966,7 @@ class Base_Task(gym.Env):
                 )
                 now_right_id += 1
 
-            self.scene.step()
+            self._step_physics()
             if self.render_freq and i % self.render_freq == 0:
                 self._update_render()
                 self.viewer.render()
@@ -1534,7 +1559,7 @@ class Base_Task(gym.Env):
                     right_gripper["per_step"],
                 )  # TODO
 
-            self.scene.step()
+            self._step_physics()
 
             if self.render_freq and control_idx % self.render_freq == 0:
                 self._update_render()
@@ -1724,7 +1749,7 @@ class Base_Task(gym.Env):
 
                 now_right_id += 1
 
-            self.scene.step()
+            self._step_physics()
             self._update_render()
                 
             if self.check_success():

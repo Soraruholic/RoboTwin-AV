@@ -60,6 +60,7 @@ class stack_blocks_two(Base_Task):
         self.block1_target_pose = [0, -0.13, 0.75 + self.table_z_bias, 0, 1, 0, 0]
 
     def play_once(self):
+        self.av_focus("locate_blocks", ["block1", "block2"], primary="block1")
         # Initialize tracking variables for gripper and actor
         self.last_gripper = None
         self.last_actor = None
@@ -79,8 +80,11 @@ class stack_blocks_two(Base_Task):
         return self.info
 
     def pick_and_place_block(self, block: Actor):
+        current_name = "block1" if block is self.block1 else "block2"
+        self.av_focus("locate_" + current_name, [current_name])
         block_pose = block.get_pose().p
         arm_tag = ArmTag("left" if block_pose[0] < 0 else "right")
+        self.av_focus("grasp_" + current_name, [current_name], ee=[str(arm_tag)])
 
         if self.last_gripper is not None and (self.last_gripper != arm_tag):
             self.move(
@@ -90,6 +94,7 @@ class stack_blocks_two(Base_Task):
         else:
             self.move(self.grasp_actor(block, arm_tag=arm_tag, pre_grasp_dis=0.09))  # arm_tag
 
+        self.av_focus("lift_" + current_name, [current_name], ee=[str(arm_tag)], wait=False)
         self.move(self.move_by_displacement(arm_tag=arm_tag, z=0.07))  # arm_tag
 
         if self.last_actor is None:
@@ -97,6 +102,9 @@ class stack_blocks_two(Base_Task):
         else:
             target_pose = self.last_actor.get_functional_point(1)
 
+        self.av_focus("place_" + current_name,
+                      [current_name] if self.last_actor is None else [current_name, "block1"],
+                      primary=current_name, ee=[str(arm_tag)], wait=False)
         self.move(
             self.place_actor(
                 block,

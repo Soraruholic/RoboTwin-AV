@@ -1,3 +1,37 @@
+# RoboTwin-AV
+
+RoboTwin-AV adds a bounded pan/tilt head camera to RoboTwin 2.0, alongside
+the existing left and right wrist cameras. It provides demonstration collection,
+synchronized HDF5 data, and a separate active-view policy evaluation interface.
+The RoboTwin documentation below also applies to installation and assets.
+
+```bash
+git clone --recurse-submodules https://github.com/Soraruholic/RoboTwin-AV.git
+cd RoboTwin-AV
+# Install RoboTwin and download its assets using the instructions below.
+bash collect_av.sh adjust_bottle demo_clean 0 --episodes 50 --max-attempts 250
+```
+
+Collection covers the 50 RoboTwin tasks with fixed, object-tracking, or
+task-stage gaze modes. Failed attempts are retained and excluded from the
+training manifest. Resume with the same command and output directory.
+
+For an AV-fine-tuned policy server:
+
+```bash
+bash eval_av.sh adjust_bottle policy/pi05/deploy.yml 0 \
+  --episodes 50 --output eval_result/pi05_adjust_bottle
+```
+
+- [Active-view collection, data format and evaluation](docs/active_view.md)
+- [π0.5 conversion, fine-tuning and deployment](policy/pi05/README.md)
+
+The native RoboTwin commands remain available. AV evaluation uses its own
+dense control protocol and results; native 14-D policy checkpoints require
+adaptation and fine-tuning before controlling the pan/tilt camera.
+
+---
+
 <h1 align="center">
   <a href="https://robotwin-benchmark.github.io"><b>RoboTwin</b> Bimanual Robotic Manipulation Platform<br></a>
 </h1>

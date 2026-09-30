@@ -1,0 +1,17 @@
+# Simulated pan/tilt controller parameters.
+enabled: true
+mode: phase
+limits_rad: [[-1.05, 1.05], [-0.60, 0.60]]
+initial_rad: [0.0, 0.0]
+pivot_offset_world_m: [0.0, 0.0, 0.0]
+max_speed_rad_s: 0.8
+max_accel_rad_s2: 3.0
+latency_s: 0.08
+settling_s: 0.12
+sample_steps: 10 # 25 Hz observations, 250 Hz exact applied command stream
+deadband_rad: 0.06
+min_visible_pixels: 24
+scan_rad: [[0.0, 0.0], [-0.45, 0.0], [0.45, 0.0], [0.0, -0.3], [0.0, 0.25]]
+scan_dwell_s: 1.5
+observation_timeout_s: 12.0
+save_segmentation: false

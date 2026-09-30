@@ -34,16 +34,20 @@ class adjust_bottle(Base_Task):
         self.right_target_pose = [0.25, -0.12, 0.95, 0, 1, 0, 0]
 
     def play_once(self):
+        self.av_focus("locate_bottle", ["bottle"])
         # Determine which arm to use based on qpose_tag (1 for right, else left)
         arm_tag = ArmTag("right" if self.qpose_tag == 1 else "left")
         # Select target pose based on qpose_tag (right_target_pose or left_target_pose)
         target_pose = (self.right_target_pose if self.qpose_tag == 1 else self.left_target_pose)
 
         # Grasp the bottle with specified arm
+        self.av_focus("grasp", ["bottle"], ee=[str(arm_tag)])
         self.move(self.grasp_actor(self.bottle, arm_tag=arm_tag, pre_grasp_dis=0.1))
         # Move the arm upward by 0.1 meters along z-axis
+        self.av_focus("lift", ["bottle"], ee=[str(arm_tag)], wait=False)
         self.move(self.move_by_displacement(arm_tag=arm_tag, z=0.1, move_axis="arm"))
         # Place the bottle at target pose (functional point 0) while keeping gripper closed
+        self.av_focus("reorient", ["bottle"], ee=[str(arm_tag)], wait=False)
         self.move(
             self.place_actor(
                 self.bottle,

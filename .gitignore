@@ -2,6 +2,7 @@ models/
 data/*
 !data/process_stuck.py
 !data/decode_image_bit.py
+!data/__init__.py
 __pycache__/
 **/checkpoints/
 result/
@@ -30,3 +31,10 @@ envs/curobo/*
 
 /*.json*
 /*.txt
+
+.pytest_cache/
+*.hdf5
+*.h5
+*.mp4
+*.log
+.venv/

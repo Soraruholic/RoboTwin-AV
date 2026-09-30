@@ -1,0 +1,11 @@
+policy: openpi
+host: 127.0.0.1
+port: 8000
+task_config: demo_clean
+action_type: dense_joint_position_velocity
+action_dim: 28
+state_dim: 16
+control_hz: 250
+execute_steps: 10
+episode_seconds: 30
+timeout_seconds: 600

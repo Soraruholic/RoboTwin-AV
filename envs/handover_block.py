@@ -47,12 +47,14 @@ class handover_block(Base_Task):
         self.block_middle_pose = [0, 0.0, 0.9, 0, 1, 0, 0]
 
     def play_once(self):
+        self.av_focus("locate_object_and_goal", ["box", "target_box"], primary="box")
         # Determine which arm to use for grasping based on box position
         grasp_arm_tag = ArmTag("left" if self.box.get_pose().p[0] < 0 else "right")
         # The other arm will be used for placing
         place_arm_tag = grasp_arm_tag.opposite
 
         # Grasp the box with the selected arm
+        self.av_focus("grasp", ["box"], ee=[str(grasp_arm_tag)])
         self.move(
             self.grasp_actor(
                 self.box,
@@ -62,8 +64,10 @@ class handover_block(Base_Task):
                 contact_point_id=[0, 1, 2, 3],
             ))
         # Lift the box up
+        self.av_focus("lift", ["box"], ee=[str(grasp_arm_tag)], wait=False)
         self.move(self.move_by_displacement(grasp_arm_tag, z=0.1))
         # Place the box at initial position [0, 0., 0.9, 0, 1, 0, 0]
+        self.av_focus("approach_handover", ["box"], ee=["left", "right"], wait=False)
         self.move(
             self.place_actor(
                 self.box,
@@ -77,6 +81,7 @@ class handover_block(Base_Task):
             ))
 
         # Grasp the box again with the other arm (for repositioning)
+        self.av_focus("handover", ["box"], ee=["left", "right"], wait=False)
         self.move(
             self.grasp_actor(
                 self.box,
@@ -86,10 +91,12 @@ class handover_block(Base_Task):
                 contact_point_id=[4, 5, 6, 7],
             ))
         # Open the original grasping arm's gripper
+        self.av_focus("release", ["box"], ee=["left", "right"], wait=False)
         self.move(self.open_gripper(grasp_arm_tag))
         # Move the original arm up to release the box
         self.move(self.move_by_displacement(grasp_arm_tag, z=0.1, move_axis="arm"))
         # Perform two actions simultaneously:
+        self.av_focus("place", ["box", "target_box"], primary="box", ee=[str(place_arm_tag)], wait=False)
         # 1. Return the original arm to its origin position
         # 2. Place the box at the target's functional point with precise alignment
         self.move(
