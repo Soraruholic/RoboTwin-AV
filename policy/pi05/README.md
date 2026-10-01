@@ -47,8 +47,7 @@ python policy/pi05/run.py train --openpi-root /path/to/openpi \
 The starter configuration uses 50 dense actions (0.2 simulated seconds),
 absolute joint/head targets, 32 batch size, and 30,000 updates. It does not
 apply ALOHA real-hardware sign/gripper conversion or a 14-D output slice.
-Keep training-derived normalization statistics with the checkpoint.
-These are starting settings, not a published trained baseline or accuracy claim.
+Use the normalization statistics saved by training when serving the checkpoint.
 
 ## Serve and evaluate
 
@@ -70,5 +69,3 @@ bash eval_av.sh adjust_bottle policy/pi05/deploy.yml 0 \
 
 Set `host` and `port` in `deploy.yml` to match the server. A native 14-D
 RoboTwin/ALOHA checkpoint does not supply trained head or velocity channels.
-Replanning every 10 ticks is a simulation protocol, not a claim of 25-Hz
-real-time model inference. Measure inference latency before hardware deployment.

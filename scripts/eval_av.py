@@ -33,7 +33,7 @@ def episode(args, cfg):
         av = task.active_view
         if not np.isclose(av.dt, 1 / CONTROL_HZ):
             raise ValueError('Unexpected simulator control frequency')
-        if cfg['policy'] == 'openpi':
+        if cfg['policy'] in ('openpi', 'easywam'):
             from openpi_client.websocket_client_policy import WebsocketClientPolicy
             client = WebsocketClientPolicy(host=cfg['host'], port=cfg['port'])
             validate_contract(client.get_server_metadata())

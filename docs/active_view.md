@@ -109,6 +109,8 @@ bash eval_av.sh adjust_bottle policy/hold.yml 0 --episodes 1 \
   --output eval_result/hold_check
 bash eval_av.sh adjust_bottle policy/pi05/deploy.yml 0 --episodes 50 \
   --output eval_result/pi05_eval
+bash eval_av.sh adjust_bottle policy/easywam/deploy.yml 0 --episodes 50 \
+  --output eval_result/easywam_eval
 ```
 
 Evaluation uses `external` mode and never calls the manipulation demonstration
@@ -123,7 +125,9 @@ It reports valid episodes, errors, successes, valid-episode success rate and
 successes divided by all attempts. Inspect error counts before comparing
 results. Use a fresh output directory for every evaluation.
 
-The supplied `hold` policy is a negative control. The π0.5 integration requires
-an AV-fine-tuned checkpoint. Native RoboTwin evaluation continues to use
+The supplied `hold` policy is a negative control. See the
+[π0.5](../policy/pi05/README.md) and [EasyWAM](../policy/easywam/README.md)
+guides for fine-tuning and starting their policy servers.
+Native RoboTwin evaluation continues to use
 `scripts/eval_policy.sh` and XPolicyLab. Its 14-D/TOPP-based action protocol
 is separate from this AV dense-control protocol.

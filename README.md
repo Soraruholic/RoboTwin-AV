@@ -25,6 +25,7 @@ bash eval_av.sh adjust_bottle policy/pi05/deploy.yml 0 \
 
 - [Active-view collection, data format and evaluation](docs/active_view.md)
 - [π0.5 conversion, fine-tuning and deployment](policy/pi05/README.md)
+- [EasyWAM conversion, fine-tuning and deployment](policy/easywam/README.md)
 
 The native RoboTwin commands remain available. AV evaluation uses its own
 dense control protocol and results; native 14-D policy checkpoints require

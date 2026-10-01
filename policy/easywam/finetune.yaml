@@ -1,0 +1,27 @@
+# Overrides for the upstream EasyWAM-Unified Wan2.2 LoRA recipe.
+batch_size: 1
+num_workers: 4
+dataloader_prefetch_factor: 2
+learning_rate: 0.0001
+max_steps: 30000
+save_every: 1000
+eval_every: 0
+checkpoint_save_limit: 3
+vae_micro_batch_size: 1
+model:
+  state_position: context
+  backbone:
+    attention_backend: sdpa
+    use_gradient_checkpointing: true
+  lora:
+    r: 16
+    lora_alpha: 16
+data:
+  train:
+    num_frames: 81
+    action_video_freq_ratio: 10
+    val_set_proportion: 0.05
+  val:
+    num_frames: 81
+    action_video_freq_ratio: 10
+    val_set_proportion: 0.05
